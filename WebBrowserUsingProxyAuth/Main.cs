@@ -6,14 +6,14 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CefSharp;
 using CefSharp.WinForms;
 using Newtonsoft.Json;
-using SteamAccountCreateHelper;
 
-namespace WinFormsApp
+namespace WebBrowserUsingProxyAuth
 {
     public partial class Main : Form
     {
@@ -42,13 +42,13 @@ namespace WinFormsApp
 
             if (!File.Exists(ConfigDiretory))
             {
-                Config usado = new Config { SingleProxyText=null, SingleProxtCkhecked=false, ProxyFilePath=null };
+                Config cfg = new Config { SingleProxyText=null, SingleProxtCkhecked=false, ProxyFilePath=null };
 
-                File.WriteAllText(ConfigDiretory, JsonConvert.SerializeObject(usado, Formatting.Indented));
+                File.WriteAllText(ConfigDiretory, JsonConvert.SerializeObject(cfg, Formatting.Indented));
             }
 
             #endregion
-
+            
             LoadConfig();
 
             settings.IgnoreCertificateErrors = true;
@@ -60,7 +60,7 @@ namespace WinFormsApp
             chrome.AddressChanged += Chrome_AddressChanged;
         }
 
-        void ChangerProxy(string URL)
+        void LoadSite(string URL)
         {
             if (!CheckProxyIsInput())
             {
@@ -74,11 +74,18 @@ namespace WinFormsApp
                 {
                     var split = txt_SingleProxy.Text.Split(':');
                     proxy = new ProxyOptions(split[0], split[1], split[2], split[3]);
+                    lbl_IP.Text = proxy.IP;
+                    lbl_PORT.Text = proxy.Port;
+                    lbl_USER.Text = proxy.Username;
+                    lbl_PASS.Text = proxy.Password;
                 }
                 else
                 {
                     proxy = ProxyList[RandomUtils.GetRandomInt(0, ProxyList.Count)];
-                    ProxyList.Remove(proxy);
+                    lbl_IP.Text = proxy.IP;
+                    lbl_PORT.Text = proxy.Port;
+                    lbl_USER.Text = proxy.Username;
+                    lbl_PASS.Text = proxy.Password;
                 }
 
                 CefSharpSettings.Proxy = proxy;
@@ -97,7 +104,7 @@ namespace WinFormsApp
         public bool CheckProxyIsInput()
         {
 
-            if (!string.IsNullOrWhiteSpace(txt_SingleProxy.Text))
+            if (!string.IsNullOrWhiteSpace(txt_SingleProxy.Text) && ckUseSingleProxy.Checked)
             {
                 return true;
             }
@@ -118,11 +125,7 @@ namespace WinFormsApp
 
         private void btn_LoadPage_Click(object sender, EventArgs e)
         {
-            ChangerProxy(txtUrl.Text);
-        }
-
-        private void btn_reload_Click(object sender, EventArgs e)
-        {
+            LoadSite(txtUrl.Text);
         }
 
         private void btn_Open_Proxy_File_Click(object sender, EventArgs e)
@@ -150,7 +153,6 @@ namespace WinFormsApp
                     lbl_ProxyLoad.Text = ProxyList.Count.ToString();
                     lbl_ProxyLoad.ForeColor = Color.DarkCyan;
                     lbl_ProxyLoad.Font = new Font("Arial", 10, FontStyle.Bold);
-                    //Log.info(EMAIl_LIST.Count + " E-Mails Load!");
                     SaveConfig();
                 }
             }
@@ -160,11 +162,6 @@ namespace WinFormsApp
                 lbl_ProxyLoad.Text = "ERROR";
                 lbl_ProxyLoad.ForeColor = Color.Red;
             }
-        }
-
-        private void btn_OpenCriationPage_Click(object sender, EventArgs e)
-        {
-            ChangerProxy("https://store.steampowered.com/join/?l=english");
         }
 
         public static void LoadConfig()
@@ -218,10 +215,7 @@ namespace WinFormsApp
             config.SingleProxtCkhecked = Main._Form.ckUseSingleProxy.Checked;
             config.SingleProxyText = Main._Form.txt_SingleProxy.Text;
             config.ProxyFilePath = ProxyFilePath;
-
             System.IO.File.WriteAllText(ConfigDiretory, JsonConvert.SerializeObject(config, Formatting.Indented));
-
-            //Log.info("Config Save..");
         }
 
         private void txt_SingleProxy_Leave(object sender, EventArgs e)
@@ -232,6 +226,12 @@ namespace WinFormsApp
         private void ckUseSingleProxy_Click(object sender, EventArgs e)
         {
             SaveConfig();
+        }
+
+        private void btn_ChangerProxy_Click(object sender, EventArgs e)
+        {
+            ProxySet = false;
+            LoadSite(txtUrl.Text);
         }
     }
 }

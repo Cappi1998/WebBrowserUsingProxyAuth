@@ -1,7 +1,7 @@
-﻿namespace SteamAccountCreateHelper
-{
-    using System;
+﻿using System;
 
+namespace WebBrowserUsingProxyAuth
+{
     class RandomUtils
     {
         private static Random r = new Random();
