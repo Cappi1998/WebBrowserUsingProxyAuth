@@ -187,7 +187,6 @@ namespace WebBrowserUsingProxyAuth
                         Main._Form.lbl_ProxyLoad.Text = ProxyList.Count.ToString();
                         Main._Form.lbl_ProxyLoad.ForeColor = Color.DarkCyan;
                         Main._Form.lbl_ProxyLoad.Font = new Font("Arial", 10, FontStyle.Bold);
-                        //Log.info(Avatar_URL_List.Count + " Avatars Load!");
                     }
 
                     if (config.SingleProxtCkhecked)
@@ -203,7 +202,7 @@ namespace WebBrowserUsingProxyAuth
                 }
                 catch (Exception ex)
                 {
-                    //Log.error($"Error to load Config: {ex.Message}");
+                    MessageBox.Show(ex.Message, "ERROR To Read File!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
